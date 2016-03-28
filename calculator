@@ -1,0 +1,4 @@
+#!/usr/bin/ruby
+require_relative './calculator.rb'
+calculator_parser = Calculator::Parser.new(ARGV[0])
+puts "#{calculator_parser.formated_input_string} = #{calculator_parser.run.to_s('F')}"

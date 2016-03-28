@@ -8,15 +8,15 @@ end
 
 module Calculator
   class Parser
-    attr_reader :input_string, :array
+    attr_reader :input_string, :array, :formated_input_string
     def initialize(calculator_string)
-      @input_string = calculator_string.dup
-      string_array = string_reformat(calculator_string).split(' ')
+      @formated_input_string = string_reformat(calculator_string.dup)
+      string_array = formated_input_string.split(' ')
       @array = string_array.map { |element| element.nan? ? element : ::BigDecimal.new(element) }
     end
 
     def run
-      puts "#{input_string} = #{generate_expressions(array).evaluate.to_s('F')}"
+      generate_expressions(array).evaluate
     end
 
     private
@@ -38,23 +38,31 @@ module Calculator
     end
 
     def string_reformat(string)
-      string = add_spaces_to_string(string)
+      string = add_spaces_around_operations(string)
       make_implicit_multiplication_explicit(string)
     end
 
-    def add_spaces_to_string(string)
-      if index = string.index(/[^\s\\][-+\/*()\^]/)
-        add_spaces_to_string(string.insert(index + 1, ' '))
-      elsif index = string.index(/[-+\/*()\^][^\s\\]/)
-        add_spaces_to_string(string.insert(index + 1, ' '))
+    def add_spaces_around_operations(string)
+      if index = string.index(/[^\s][-+\/*()\^]/)
+        add_spaces_around_operations(string.insert(index + 1, ' '))
+      elsif index = string.index(/[+\/*()\^][^\s]/)
+        add_spaces_around_operations(string.insert(index + 1, ' '))
+      else
+        handle_negative_vs_subtraction(string)
+      end
+    end
+
+    def handle_negative_vs_subtraction(string)
+      if index = string.index(/[^-+\/*(\^][\s][-][\d]/)
+        handle_negative_vs_subtraction(string.insert(index + 3, ' '))
       else
         string
       end
     end
 
     def make_implicit_multiplication_explicit(string)
-      if index = string.index(/[^(-+\/*\^][\s\\][(]/)
-        add_spaces_to_string(string.insert(index + 1, ' *'))
+      if index = string.index(/[^(-+\/*\^][\s][(]/)
+        make_implicit_multiplication_explicit(string.insert(index + 1, ' *'))
       else
         string
       end
@@ -125,10 +133,3 @@ class ArraySquisher
     end
   end
 end
-
-puts Calculator::Parser.new('3 * 2 ^ ( ( 3 + 1 ) - 1 *  5 + 2 )').run
-puts Calculator::Parser.new('3 * 2 ^ ( ( 3 + 1 ) - 1 * ( 5 + 2 ) )').run
-puts Calculator::Parser.new('3 * 2 ^ ( ( 3 + 1 ) - 1 * ( 5 + 2 ) ) + 1.1').run
-puts Calculator::Parser.new('3*2^((3+1)-1(5+2))+1.1').run
-puts Calculator::Parser.new('3*2^((3+1)-1(5+2))+1.1').run
-puts Calculator::Parser.new('3*2^((3+(1))-1(((5+2))))+1.1').run
