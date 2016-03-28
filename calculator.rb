@@ -1,4 +1,3 @@
-require 'pp'
 require 'bigdecimal'
 
 class String
@@ -77,7 +76,6 @@ module Calculator
       end
       perform_order_of_operations(array)
     end
-
 
     def perform_operation(value_1, value_2, operation_string)
       case operation_string
