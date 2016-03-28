@@ -17,6 +17,8 @@ time crunch (I know its a poor excuse)
 
 Make all the regex nonsense much cleaner and more reusable
 
+Not put everything in the same file, sorry!
+
 
 ### RUNNING IT FROM COMMAND LINE
 
