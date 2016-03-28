@@ -79,6 +79,8 @@ module Calculator
       perform_order_of_operations(inner_evaluation).first
     end
 
+    private
+
     def perform_order_of_operations(running_evaluation)
       ORDER_OF_OPERATIONS.each do |operation_set|
         if (running_evaluation & operation_set).length > 0
