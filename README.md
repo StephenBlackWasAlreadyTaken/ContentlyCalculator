@@ -7,8 +7,6 @@ Anyhow, Here it is, void of any specs or input validation and requires a rather 
 
 #### Things to note
 
-All numbers and operations and parentheses must have a space separating them (lame, I know, I am rather dissapointed myself!)
-
 all numbers must be integers or decimals, nothing too fancy smancy, operators are `+ - * / ^`
 
 parentheses can be used, go wild
