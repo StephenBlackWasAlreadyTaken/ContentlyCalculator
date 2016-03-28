@@ -8,16 +8,18 @@ end
 
 module Calculator
   class Parser
-    attr_reader :string, :array
+    attr_reader :input_string, :array
     def initialize(calculator_string)
-      @string = calculator_string
-      string_array = string.split(' ')
+      @input_string = calculator_string.dup
+      string_array = string_reformat(calculator_string).split(' ')
       @array = string_array.map { |element| element.nan? ? element : ::BigDecimal.new(element) }
     end
 
     def run
-      puts "#{string} = #{generate_expressions(array).evaluate.to_s('F')}"
+      puts "#{input_string} = #{generate_expressions(array).evaluate.to_s('F')}"
     end
+
+    private
 
     def generate_expressions(parsed_array)
       if parsed_array.index('(') 
@@ -27,17 +29,35 @@ module Calculator
       end
     end
 
-
-    def is_number?(string)
-      string.to_i.to_s == string
-    end
-
     def inner_expression(array)
       left_paren = array.rindex('(')
       right_paren = array[left_paren..(array.length - 1)].index(')') + left_paren
       inner_array = array[(left_paren + 1)..(right_paren - 1)]
       expression = Expression.new(inner_array)
       ArraySquisher.squish(array, expression, left_paren + 1, inner_array.length)
+    end
+
+    def string_reformat(string)
+      string = add_spaces_to_string(string)
+      make_implicit_multiplication_explicit(string)
+    end
+
+    def add_spaces_to_string(string)
+      if index = string.index(/[^\s\\][-+\/*()\^]/)
+        add_spaces_to_string(string.insert(index + 1, ' '))
+      elsif index = string.index(/[-+\/*()\^][^\s\\]/)
+        add_spaces_to_string(string.insert(index + 1, ' '))
+      else
+        string
+      end
+    end
+
+    def make_implicit_multiplication_explicit(string)
+      if index = string.index(/[^(-+\/*\^][\s\\][(]/)
+        add_spaces_to_string(string.insert(index + 1, ' *'))
+      else
+        string
+      end
     end
   end
 
@@ -104,7 +124,9 @@ class ArraySquisher
   end
 end
 
-
 puts Calculator::Parser.new('3 * 2 ^ ( ( 3 + 1 ) - 1 *  5 + 2 )').run
 puts Calculator::Parser.new('3 * 2 ^ ( ( 3 + 1 ) - 1 * ( 5 + 2 ) )').run
 puts Calculator::Parser.new('3 * 2 ^ ( ( 3 + 1 ) - 1 * ( 5 + 2 ) ) + 1.1').run
+puts Calculator::Parser.new('3*2^((3+1)-1(5+2))+1.1').run
+puts Calculator::Parser.new('3*2^((3+1)-1(5+2))+1.1').run
+puts Calculator::Parser.new('3*2^((3+(1))-1(((5+2))))+1.1').run
